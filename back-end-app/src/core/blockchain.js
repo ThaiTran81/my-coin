@@ -23,8 +23,8 @@ class Blockchain {
         this.blocks = [this.getGenesisBlock()];
         this.io = io;
     }
-    
-    hashBlock({ index, prevHash, transactions, timeStamp, difficult, nonce }) {
+
+    hashBlock({index, prevHash, transactions, timeStamp, difficult, nonce}) {
         const stringHash = `${index}${prevHash}` +
             JSON.stringify(transactions) +
             `${timeStamp}${difficult}${nonce}`;
@@ -38,7 +38,14 @@ class Blockchain {
                     resolve(null);
                     return;
                 }
-                const hashBlock = this.hashBlock({ index, prevHash, transactions, timeStamp, difficult: this.difficult, nonce });
+                const hashBlock = this.hashBlock({
+                    index,
+                    prevHash,
+                    transactions,
+                    timeStamp,
+                    difficult: this.difficult,
+                    nonce
+                });
                 if (this.hashMatchDifficult(hashBlock, this.difficult)) {
                     this.setMine(false);
                     resolve(new Block(index, prevHash, hashBlock, transactions, timeStamp, this.difficult, nonce));
@@ -49,7 +56,7 @@ class Blockchain {
         })
     }
 
-    generateTransaction(sender, recipient, amount, privateKey){
+    generateTransaction(sender, recipient, amount, privateKey) {
         const newTransaction = new Transaction();
         const uTxOutsByAddress = this.getUTxOutsByAddress(sender);
         if (!this.checkBalance(amount, sender)) {
@@ -63,6 +70,7 @@ class Blockchain {
         newTransaction.signAllTxIns(privateKey, uTxOutsByAddress);
         return newTransaction;
     }
+
     /////////////////////////// add ///////////////////////////
 
     async addBlock(newBlock) {
@@ -74,7 +82,7 @@ class Blockchain {
         if (this.blockIsValid(newBlock)) {
             this.blocks.push(newBlock);
             this.updateUnspentTxOut(newBlock);
-            this.pendingTransactions.splice(0, newBlock.transactions.length-1);
+            this.pendingTransactions.splice(0, newBlock.transactions.length - 1);
             console.log('success add block into blockchain!!');
         }
     }
@@ -84,13 +92,14 @@ class Blockchain {
         return rewardTransaction;
     }
 
-    addTransaction(transaction) {        
+    addTransaction(transaction) {
         this.pendingTransactions.push(transaction);
     }
 
-    addNode(node){
+    addNode(node) {
         this.nodes.push(node);
     }
+
     /////////////////////////// valid ///////////////////////////
     transactionsIsValid(transactions) {
         let valid = true;
@@ -134,11 +143,11 @@ class Blockchain {
     }
 
     blockIsValid(newBlock, prevBlock = null) {
-        
+
         const lastBlock = prevBlock || this.getLastBlock();
 
         if (+newBlock.index !== lastBlock.index + 1) {
-            console.log('invalid index'+newBlock.index);
+            console.log('invalid index' + newBlock.index);
             return false;
         }
 
@@ -170,14 +179,15 @@ class Blockchain {
         return hash.startsWith(difficultString);
     }
 
-    checkMine(){
-        if (this.pendingTransactions.length > this.minimumTx && !this.canMine){
+    checkMine() {
+        if (this.pendingTransactions.length > this.minimumTx && !this.canMine) {
             return true;
         }
         return false;
     }
+
     /////////////////////////// get ///////////////////////////
-    
+
     getBlockChain() {
         return this.blocks;
     }
@@ -198,14 +208,14 @@ class Blockchain {
 
     }
 
-    getMine(){
+    getMine() {
         return this.canMine;
     }
 
     getLastBlock() {
         return this.blocks[this.blocks.length - 1];
     }
-    
+
     getUnspentTxOuts() {
         return this.unspentTxOuts;
     }
@@ -220,30 +230,33 @@ class Blockchain {
 
     getTransactionsByAddress(address) {
         const currentTransactions = [];
-        const refUTxOuts =  this.unspentTxOuts.filter(uTxOut => uTxOut.address === address);
+        const refUTxOuts = this.unspentTxOuts.filter(uTxOut => uTxOut.address === address);
         if (refUTxOuts.length !== 0) {
             refUTxOuts.forEach(uTxOut => {
                 this.blocks.forEach(element => {
                     element.transactions.forEach(tx => {
-                        let newTx = { hash: tx.hash, timeStamp: element.timeStamp, block: element.index };
+                        let newTx = {hash: tx.hash, timeStamp: element.timeStamp, block: element.index};
                         tx.txIns.forEach(txIn => {
                             if (txIn.txOutId === '0' && tx.txOuts[0].address === uTxOut.address
                                 && tx.txOuts.length <= 1 && tx.txOuts[0].amount === uTxOut.amount) {
-                                newTx = { ...newTx, from: `${(txIn.txOutIndex === 0) ? 'system send' : 'coinbase (reward)'}` };
+                                newTx = {
+                                    ...newTx,
+                                    from: `${(txIn.txOutIndex === 0) ? 'system send' : 'coinbase (reward)'}`
+                                };
                             }
                             if (uTxOut.txOutId === txIn.txOutId) {
-                                newTx = { ...newTx, from: uTxOut.address };
+                                newTx = {...newTx, from: uTxOut.address};
                             }
 
                         })
                         if (uTxOut.txOutId === tx.txOuts[0].txOutId) {
                             const sender = this.unspentTxOuts.filter(uTxOut => uTxOut.txOutId === tx.txIns[0].txOutId);
-                            if (sender.length !== 0){
-                                newTx = { ...newTx, from: sender[0].address };
+                            if (sender.length !== 0) {
+                                newTx = {...newTx, from: sender[0].address};
                             }
                         }
-                        newTx = { ...newTx, to: tx.txOuts[0].address, amount: `${tx.txOuts[0].amount}` };
-                        
+                        newTx = {...newTx, to: tx.txOuts[0].address, amount: `${tx.txOuts[0].amount}`};
+
                         if (newTx.from && newTx.to) {
                             currentTransactions.push(newTx);
                         }
@@ -251,35 +264,39 @@ class Blockchain {
                 })
                 this.pendingTransactions.forEach(pTransaction => {
                     const txIns = pTransaction.txIns.filter(txIn => txIn.txOutId === uTxOut.txOutId);
-                    if (txIns.length > 0){
-                        let newTx = { hash: pTransaction.hash, 
-                            timeStamp: new Date().toString(), 
+                    if (txIns.length > 0) {
+                        let newTx = {
+                            hash: pTransaction.hash,
+                            timeStamp: new Date().toString(),
                             block: -1,
                             from: address,
                             to: pTransaction.txOuts[0].address,
-                            amount: pTransaction.txOuts[0].amount };
+                            amount: pTransaction.txOuts[0].amount
+                        };
                         currentTransactions.push(newTx);
-                    }                   
+                    }
 
                 })
             })
         }
 
         this.pendingTransactions.forEach(pTransaction => {
-            if(pTransaction.txOuts[0].address === address){
-                const sysSend = (pTransaction.txIns[0].txOutId === '0' && pTransaction.txIns[0].txOutIndex === 0)? enumSysSender.COIN_SYSTEM : '';                      
+            if (pTransaction.txOuts[0].address === address) {
+                const sysSend = (pTransaction.txIns[0].txOutId === '0' && pTransaction.txIns[0].txOutIndex === 0) ? enumSysSender.COIN_SYSTEM : '';
                 const txInsSend = this.unspentTxOuts.filter(uTxOut => pTransaction.txIns[0].txOutId === uTxOut.txOutId);
-                let newTx = { hash: pTransaction.hash, 
-                    timeStamp: new Date().toString(), 
+                let newTx = {
+                    hash: pTransaction.hash,
+                    timeStamp: new Date().toString(),
                     block: -1,
                     from: '',
                     to: address,
-                    amount: pTransaction.txOuts[0].amount };
-                if (txInsSend.length > 0){
+                    amount: pTransaction.txOuts[0].amount
+                };
+                if (txInsSend.length > 0) {
                     newTx.from = txInsSend.address;
-                    }else{
-                        newTx.from = sysSend;
-                    }
+                } else {
+                    newTx.from = sysSend;
+                }
                 currentTransactions.push(newTx);
             }
         })
@@ -287,7 +304,7 @@ class Blockchain {
         return currentTransactions.filter((value, index, array) => array.findIndex(element => JSON.stringify(element) === JSON.stringify(value)) === index);
     }
 
-    getUTxOutsByAddress(address){
+    getUTxOutsByAddress(address) {
         return this.unspentTxOuts.filter(uTxOut => uTxOut.address === address && uTxOut.status === 1);
     }
 
@@ -296,7 +313,7 @@ class Blockchain {
         return uTxOutsOfAddress.reduce((a, b) => a + b.amount, 0);
     }
 
-    getNodes(){
+    getNodes() {
         return this.nodes;
     }
 
@@ -305,7 +322,7 @@ class Blockchain {
         this.difficult = value;
     }
 
-    setMine(value){
+    setMine(value) {
         this.canMine = value;
     }
 
@@ -337,13 +354,14 @@ class Blockchain {
 
     }
 
-    parseChain(blockchain){
+    parseChain(blockchain) {
         this.replaceChain(blockchain.blocks);
         this.unspentTxOuts = blockchain.unspentTxOuts;
         this.pendingTransactions = blockchain.pendingTransactions;
     }
-     /////////////////////////// delete ///////////////////////////
-    deleteNode(socket){
+
+    /////////////////////////// delete ///////////////////////////
+    deleteNode(socket) {
         const index = this.nodes.findIndex(value => {
             return value.id === socket.id
         });
@@ -352,29 +370,32 @@ class Blockchain {
 
     getTransactions() {
         const currentTransactions = [];
-        const refUTxOuts =  this.unspentTxOuts;
+        const refUTxOuts = this.unspentTxOuts;
         if (refUTxOuts.length !== 0) {
             refUTxOuts.forEach(uTxOut => {
                 this.blocks.forEach(element => {
                     element.transactions.forEach(tx => {
-                        let newTx = { hash: tx.hash, timeStamp: element.timeStamp, block: element.index };
+                        let newTx = {hash: tx.hash, timeStamp: element.timeStamp, block: element.index};
                         tx.txIns.forEach(txIn => {
                             if (txIn.txOutId === '0' && tx.txOuts[0].address === uTxOut.address
                                 && tx.txOuts.length <= 1 && tx.txOuts[0].amount === uTxOut.amount) {
-                                newTx = { ...newTx, from: `${(txIn.txOutIndex === 0) ? 'system send' : 'coinbase (reward)'}` };
+                                newTx = {
+                                    ...newTx,
+                                    from: `${(txIn.txOutIndex === 0) ? 'system send' : 'coinbase (reward)'}`
+                                };
                             }
                             if (uTxOut.txOutId === txIn.txOutId) {
-                                newTx = { ...newTx, from: uTxOut.address };
+                                newTx = {...newTx, from: uTxOut.address};
                             }
 
                         })
                         if (uTxOut.txOutId === tx.txOuts[0].txOutId) {
                             const sender = this.unspentTxOuts.filter(uTxOut => uTxOut.txOutId === tx.txIns[0].txOutId);
-                            if (sender.length !== 0){
-                                newTx = { ...newTx, from: sender[0].address };
+                            if (sender.length !== 0) {
+                                newTx = {...newTx, from: sender[0].address};
                             }
                         }
-                        newTx = { ...newTx, to: tx.txOuts[0].address, amount: `${tx.txOuts[0].amount}` };
+                        newTx = {...newTx, to: tx.txOuts[0].address, amount: `${tx.txOuts[0].amount}`};
 
                         if (newTx.from && newTx.to) {
                             currentTransactions.push(newTx);
@@ -383,13 +404,15 @@ class Blockchain {
                 })
                 this.pendingTransactions.forEach(pTransaction => {
                     const txIns = pTransaction.txIns.filter(txIn => txIn.txOutId === uTxOut.txOutId);
-                    if (txIns.length > 0){
-                        let newTx = { hash: pTransaction.hash,
+                    if (txIns.length > 0) {
+                        let newTx = {
+                            hash: pTransaction.hash,
                             timeStamp: new Date().toString(),
                             block: -1,
                             from: uTxOut.address,
                             to: pTransaction.txOuts[0].address,
-                            amount: pTransaction.txOuts[0].amount };
+                            amount: pTransaction.txOuts[0].amount
+                        };
                         currentTransactions.push(newTx);
                     }
 
@@ -418,12 +441,12 @@ class Blockchain {
 
 class Block {
     constructor(index,
-        prevHash,
-        hash,
-        transactions,
-        timeStamp,
-        difficult,
-        nonce, minner = null) {
+                prevHash,
+                hash,
+                transactions,
+                timeStamp,
+                difficult,
+                nonce, minner = null) {
         this.index = index;
         this.transactions = transactions;
         this.timeStamp = timeStamp;
@@ -436,13 +459,13 @@ class Block {
 }
 
 class Transaction {
-    constructor(txIns= [],txOuts = [], hash = '') {
+    constructor(txIns = [], txOuts = [], hash = '') {
         this.txIns = [];
         this.txOuts = [];
         this.hash = '';
     }
 
-    parseTrasaction({ txIns, txOuts, hash }) {
+    parseTrasaction({txIns, txOuts, hash}) {
         this.txIns = txIns;
         this.txOuts = txOuts;
         this.hash = hash;
@@ -497,15 +520,15 @@ class Transaction {
         const txOuts = [];
 
         if (systemSender.includes(sender)) {
-            const uTxOut = new UnspentTxOut({from: sender, address: recipient, amount: +amount });
+            const uTxOut = new UnspentTxOut({from: sender, address: recipient, amount: +amount});
             txOuts.push(uTxOut);
         } else {
-            const uTxOut = new UnspentTxOut({from: sender, address: recipient, amount: +amount });
+            const uTxOut = new UnspentTxOut({from: sender, address: recipient, amount: +amount});
             txOuts.push(uTxOut);
             const refund = txInBalance - amount;
 
             if (refund > 0) {
-                const uTxOutrefund = new UnspentTxOut({from: sender, address: sender, amount: refund });
+                const uTxOutrefund = new UnspentTxOut({from: sender, address: sender, amount: refund});
 
                 txOuts.push(uTxOutrefund);
             }
@@ -565,7 +588,7 @@ class TxIn {
 }
 
 class UnspentTxOut {
-    constructor({ from, address, amount }) {
+    constructor({from, address, amount}) {
         this.txOutId = '';
         this.txOutIndex = 0;
         this.address = address;
