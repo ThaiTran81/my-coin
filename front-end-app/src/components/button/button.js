@@ -9,20 +9,6 @@ export const Button = (props) => {
                     <div className='title'>
                         <h2>{props.title}</h2>
                     </div>
-                    <div className='description'>
-                        <p>{props.description}</p>
-                        <ul>
-                            {
-                                props.subDesc &&
-
-                                props.subDesc.map((item) => {
-                                    return (
-                                        <li>{item}</li>
-                                    );
-                                })
-                            }
-                        </ul>
-                    </div>
                 </div>
                 <div className='direct'>
                     <h4>{props.direct} <i className="fa fa-long-arrow-right fa-lg" style={{marginLeft: '0.25rem'}} aria-hidden="true"></i></h4>

@@ -19,8 +19,8 @@
     }
     color: $--white;
     margin-right: 2rem;
-    padding: 0rem 2.5rem;
-    height: 100%;
+    padding: 2.5rem;
+    height:200px;
     border-radius: 0.25rem;
     transition: all 0.3s;
     display: flex;
@@ -37,7 +37,6 @@
         text-align: left;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
         .text{
             display: flex;
             flex-direction: column;
