@@ -167,7 +167,5 @@ export const ButtonContainer = (props) => {
 
 
 const btnData = [
-    { srcImg: 'https://www.myetherwallet.com/img/button-hardware.945afa77.svg', style: '', title: 'Hardware', desc: ' Ledger wallet, FINNEY, Trezor, BitBox, Secalot, KeepKey, XWallet ', subNote: '' },
-    { srcImg: 'https://www.myetherwallet.com/img/button-web3.dc2ff19c.svg', style: '', title: 'MEW CX', desc: ' MetaMask; Dapper ', subNote: '' },
-    { srcImg: 'https://www.myetherwallet.com/img/button-software.2a233dbf.svg', style: 'btn-danger', title: 'Software', desc: ' Keystore file, Private key, Mnemonic phrase ', subNote: 'Not recommended' }
+    { srcImg: 'https://www.myetherwallet.com/img/button-software.2a233dbf.svg', style: 'btn-success', title: 'Software', desc: ' Keystore file, Private key, Mnemonic phrase ', subNote: '' }
 ];
