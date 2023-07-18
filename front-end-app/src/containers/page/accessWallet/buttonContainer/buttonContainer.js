@@ -115,18 +115,6 @@ export const ButtonContainer = (props) => {
                                 (() => {
                                     switch (currentModal.number) {
                                         case 1:
-                                            return (
-                                                <div className='wallet-option-next'>
-                                                    <h2>Nothing Here</h2>
-                                                </div>
-                                            );
-                                        case 2:
-                                            return (
-                                                <div className='wallet-option-next'>
-                                                    <h2>Nothing Here</h2>
-                                                </div>
-                                            );
-                                        case 3:
                                             return <SoftwareContainer setData={setData} setCurrentModal={setCurrentModal} setStateModal={setStateModal}></SoftwareContainer>;
                                         
                                         case 31:
