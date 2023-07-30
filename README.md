@@ -5,4 +5,4 @@
 - c. Gởi coin cho một địa chỉ khác
 - d. Xem lịch sử giao dịch (build giống GUI https://etherscan.io/)
 2. Sử dụng thuật toán Proof Of Work/Proof Of Stake/
-## video demo: 
+## video demo: [https://youtu.be/PO_t43QaDh0](https://youtu.be/PO_t43QaDh0)
